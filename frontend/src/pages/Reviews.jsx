@@ -105,7 +105,7 @@ const ReviewCard = ({ review, onRespond, isReceived }) => {
         </Typography>
 
         <Grid container spacing={2} sx={{ mb: 2 }}>
-          <Grid xs={6} sm={3}>
+          <Grid item xs={6} sm={3}>
             <Box sx={{ textAlign: 'center' }}>
               <EmojiEvents sx={{ color: 'text.secondary' }} />
               <Typography variant="caption" display="block" color="text.secondary">
@@ -114,7 +114,7 @@ const ReviewCard = ({ review, onRespond, isReceived }) => {
               <Rating value={review.quality_rating} readOnly size="small" />
             </Box>
           </Grid>
-          <Grid xs={6} sm={3}>
+          <Grid item xs={6} sm={3}>
             <Box sx={{ textAlign: 'center' }}>
               <Chat sx={{ color: 'text.secondary' }} />
               <Typography variant="caption" display="block" color="text.secondary">
@@ -123,7 +123,7 @@ const ReviewCard = ({ review, onRespond, isReceived }) => {
               <Rating value={review.communication_rating} readOnly size="small" />
             </Box>
           </Grid>
-          <Grid xs={6} sm={3}>
+          <Grid item xs={6} sm={3}>
             <Box sx={{ textAlign: 'center' }}>
               <Speed sx={{ color: 'text.secondary' }} />
               <Typography variant="caption" display="block" color="text.secondary">
@@ -132,7 +132,7 @@ const ReviewCard = ({ review, onRespond, isReceived }) => {
               <Rating value={review.punctuality_rating} readOnly size="small" />
             </Box>
           </Grid>
-          <Grid xs={6} sm={3}>
+          <Grid item xs={6} sm={3}>
             <Box sx={{ textAlign: 'center' }}>
               <Handshake sx={{ color: 'text.secondary' }} />
               <Typography variant="caption" display="block" color="text.secondary">
@@ -242,7 +242,7 @@ const Reviews = () => {
         <Skeleton variant="rectangular" height={200} sx={{ mb: 3 }} />
         <Grid container spacing={3}>
           {[1, 2, 3].map((item) => (
-            <Grid xs={12} key={item}>
+            <Grid item xs={12} key={item}>
               <Skeleton variant="rectangular" height={150} />
             </Grid>
           ))}
@@ -265,7 +265,7 @@ const Reviews = () => {
 
       {/* Stats Overview */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid xs={12} md={4}>
+        <Grid item xs={12} md={4}>
           <Paper sx={{ p: 3, textAlign: 'center' }}>
             <Typography variant="h2" fontWeight="bold" color="primary.main">
               {stats.averageRating.toFixed(1)}
@@ -277,7 +277,7 @@ const Reviews = () => {
           </Paper>
         </Grid>
 
-        <Grid xs={12} md={4}>
+        <Grid item xs={12} md={4}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="subtitle1" gutterBottom fontWeight="medium">
               Rating Breakdown
@@ -303,7 +303,7 @@ const Reviews = () => {
           </Paper>
         </Grid>
 
-        <Grid xs={12} md={4}>
+        <Grid item xs={12} md={4}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="subtitle1" gutterBottom fontWeight="medium">
               Category Ratings

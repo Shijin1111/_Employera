@@ -219,7 +219,7 @@ const PostJob = () => {
                 </Typography>
                 <Grid container spacing={2}>
                   {templates.slice(0, 3).map((template) => (
-                    <Grid xs={12} md={4} key={template.id}>
+                    <Grid item xs={12} md={4} key={template.id}>
                       <Card
                         sx={{
                           p: 2,
@@ -245,7 +245,7 @@ const PostJob = () => {
             )}
 
             <Grid container spacing={3}>
-              <Grid xs={12}>
+              <Grid item xs={12}>
                 <Controller
                   name="category"
                   control={control}
@@ -268,7 +268,7 @@ const PostJob = () => {
                 />
               </Grid>
 
-              <Grid xs={12}>
+              <Grid item xs={12}>
                 <Controller
                   name="title"
                   control={control}
@@ -286,7 +286,7 @@ const PostJob = () => {
                 />
               </Grid>
 
-              <Grid xs={12}>
+              <Grid item xs={12}>
                 <Controller
                   name="description"
                   control={control}
@@ -312,7 +312,7 @@ const PostJob = () => {
                 />
               </Grid>
 
-              <Grid xs={12}>
+              <Grid item xs={12}>
                 <Controller
                   name="skills_required"
                   control={control}
@@ -356,7 +356,7 @@ renderTags={(value, getTagProps) =>
                 />
               </Grid>
 
-              <Grid xs={12}>
+              <Grid item xs={12}>
                 <Controller
                   name="urgency"
                   control={control}
@@ -397,7 +397,7 @@ renderTags={(value, getTagProps) =>
         return (
           <Box>
             <Grid container spacing={3}>
-              <Grid xs={12}>
+              <Grid item xs={12}>
                 <Controller
                   name="location_type"
                   control={control}
@@ -423,7 +423,7 @@ renderTags={(value, getTagProps) =>
 
               {watch('location_type') === 'onsite' && (
                 <>
-                  <Grid xs={12}>
+                  <Grid item xs={12}>
                     <Controller
                       name="address"
                       control={control}
@@ -447,7 +447,7 @@ renderTags={(value, getTagProps) =>
                     />
                   </Grid>
 
-                  <Grid xs={12} md={4}>
+                  <Grid item xs={12} md={4}>
                     <Controller
                       name="city"
                       control={control}
@@ -464,7 +464,7 @@ renderTags={(value, getTagProps) =>
                     />
                   </Grid>
 
-                  <Grid xs={12} md={4}>
+                  <Grid item xs={12} md={4}>
                     <Controller
                       name="state"
                       control={control}
@@ -481,7 +481,7 @@ renderTags={(value, getTagProps) =>
                     />
                   </Grid>
 
-                  <Grid xs={12} md={4}>
+                  <Grid item xs={12} md={4}>
                     <Controller
                       name="zip_code"
                       control={control}
@@ -497,7 +497,7 @@ renderTags={(value, getTagProps) =>
                 </>
               )}
 
-              <Grid xs={12} md={6}>
+              <Grid item xs={12} md={6}>
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
                   <Controller
                     name="start_date"
@@ -521,7 +521,7 @@ renderTags={(value, getTagProps) =>
                 </LocalizationProvider>
               </Grid>
 
-              <Grid xs={12} md={6}>
+              <Grid item xs={12} md={6}>
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
                   <Controller
                     name="start_time"
@@ -539,7 +539,7 @@ renderTags={(value, getTagProps) =>
                 </LocalizationProvider>
               </Grid>
 
-              <Grid xs={12} md={6}>
+              <Grid item xs={12} md={6}>
                 <Controller
                   name="estimated_duration"
                   control={control}
@@ -561,7 +561,7 @@ renderTags={(value, getTagProps) =>
                 />
               </Grid>
 
-              <Grid xs={12} md={6}>
+              <Grid item xs={12} md={6}>
                 <Controller
                   name="is_flexible"
                   control={control}
@@ -581,7 +581,7 @@ renderTags={(value, getTagProps) =>
         return (
           <Box>
             <Grid container spacing={3}>
-              <Grid xs={12}>
+              <Grid item xs={12}>
                 <Typography variant="subtitle1" gutterBottom>
                   Budget Range
                 </Typography>
@@ -590,7 +590,7 @@ renderTags={(value, getTagProps) =>
                 </Typography>
               </Grid>
 
-              <Grid xs={12} md={6}>
+              <Grid item xs={12} md={6}>
                 <Controller
                   name="budget_min"
                   control={control}
@@ -616,7 +616,7 @@ renderTags={(value, getTagProps) =>
                 />
               </Grid>
 
-              <Grid xs={12} md={6}>
+              <Grid item xs={12} md={6}>
                 <Controller
                   name="budget_max"
                   control={control}
@@ -643,7 +643,7 @@ renderTags={(value, getTagProps) =>
                 />
               </Grid>
 
-              <Grid xs={12}>
+              <Grid item xs={12}>
                 <Box sx={{ p: 2, bgcolor: 'primary.light', borderRadius: 2, mb: 2 }}>
                   <FormControlLabel
                     control={
@@ -696,7 +696,7 @@ renderTags={(value, getTagProps) =>
                 </Collapse>
               </Grid>
 
-              <Grid xs={12} md={6}>
+              <Grid item xs={12} md={6}>
                 <Controller
                   name="number_of_workers"
                   control={control}
@@ -714,7 +714,7 @@ renderTags={(value, getTagProps) =>
                 />
               </Grid>
 
-              <Grid xs={12} md={6}>
+              <Grid item xs={12} md={6}>
                 <Controller
                   name="physical_requirements"
                   control={control}
@@ -731,7 +731,7 @@ renderTags={(value, getTagProps) =>
                 />
               </Grid>
 
-              <Grid xs={12}>
+              <Grid item xs={12}>
                 <Controller
                   name="tools_provided"
                   control={control}
@@ -756,7 +756,7 @@ renderTags={(value, getTagProps) =>
               </Grid>
 
               {!watch('tools_provided') && (
-                <Grid xs={12}>
+                <Grid item xs={12}>
                   <Controller
                     name="tools_required"
                     control={control}
@@ -781,7 +781,7 @@ renderTags={(value, getTagProps) =>
         return (
           <Box>
             <Grid container spacing={3}>
-              <Grid xs={12}>
+              <Grid item xs={12}>
                 <Box sx={{ p: 2, bgcolor: 'info.light', borderRadius: 2, mb: 2 }}>
                   <FormControlLabel
                     control={
@@ -805,7 +805,7 @@ renderTags={(value, getTagProps) =>
 
                 <Collapse in={showAutoMatch}>
                   <Grid container spacing={2}>
-                    <Grid xs={12} md={6}>
+                    <Grid item xs={12} md={6}>
                       <Typography gutterBottom>
                         Minimum Worker Rating
                       </Typography>
@@ -829,7 +829,7 @@ renderTags={(value, getTagProps) =>
                       />
                     </Grid>
 
-                    <Grid xs={12} md={6}>
+                    <Grid item xs={12} md={6}>
                       <Typography gutterBottom>
                         Maximum Distance (km)
                       </Typography>
@@ -855,7 +855,7 @@ renderTags={(value, getTagProps) =>
                 </Collapse>
               </Grid>
 
-              <Grid xs={12}>
+              <Grid item xs={12}>
                 <Typography variant="subtitle1" gutterBottom>
                   Add Photos (Optional)
                 </Typography>
@@ -889,7 +889,7 @@ renderTags={(value, getTagProps) =>
                 {uploadedImages.length > 0 && (
                   <Grid container spacing={2} sx={{ mt: 2 }}>
                     {uploadedImages.map((image, index) => (
-                      <Grid xs={6} md={3} key={index}>
+                      <Grid item xs={6} md={3} key={index}>
                         <Card>
                           <CardMedia
                             component="img"
@@ -956,7 +956,7 @@ renderTags={(value, getTagProps) =>
               </Typography>
 
               <Grid container spacing={2}>
-                <Grid xs={12} md={6}>
+                <Grid item xs={12} md={6}>
                   <Typography variant="subtitle2" color="text.secondary">
                     Location
                   </Typography>
@@ -967,7 +967,7 @@ renderTags={(value, getTagProps) =>
                   </Typography>
                 </Grid>
 
-                <Grid xs={12} md={6}>
+                <Grid item xs={12} md={6}>
                   <Typography variant="subtitle2" color="text.secondary">
                     Schedule
                   </Typography>
@@ -977,7 +977,7 @@ renderTags={(value, getTagProps) =>
                   </Typography>
                 </Grid>
 
-                <Grid xs={12} md={6}>
+                <Grid item xs={12} md={6}>
                   <Typography variant="subtitle2" color="text.secondary">
                     Budget Range
                   </Typography>
@@ -986,7 +986,7 @@ renderTags={(value, getTagProps) =>
                   </Typography>
                 </Grid>
 
-                <Grid xs={12} md={6}>
+                <Grid item xs={12} md={6}>
                   <Typography variant="subtitle2" color="text.secondary">
                     Workers Needed
                   </Typography>
@@ -995,7 +995,7 @@ renderTags={(value, getTagProps) =>
                   </Typography>
                 </Grid>
 
-                <Grid xs={12}>
+                <Grid item xs={12}>
                   <Typography variant="subtitle2" color="text.secondary">
                     Required Skills
                   </Typography>
@@ -1053,7 +1053,7 @@ renderTags={(value, getTagProps) =>
       </Box>
 
       <Grid container spacing={3}>
-        <Grid xs={12} md={3}>
+        <Grid item xs={12} md={3}>
           <Paper sx={{ p: 2 }}>
             <Stepper activeStep={activeStep} orientation="vertical">
               {steps.map((label, index) => (
@@ -1084,7 +1084,7 @@ renderTags={(value, getTagProps) =>
           </Paper>
         </Grid>
 
-        <Grid xs={12} md={9}>
+        <Grid item xs={12} md={9}>
           <Paper sx={{ p: 4 }}>
             {renderStepContent()}
 

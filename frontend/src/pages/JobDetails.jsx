@@ -252,10 +252,10 @@ const JobDetails = () => {
       <Box>
         <Skeleton variant="rectangular" height={200} sx={{ mb: 3 }} />
         <Grid container spacing={3}>
-          <Grid xs={12} md={8}>
+          <Grid item xs={12} md={8}>
             <Skeleton variant="rectangular" height={400} />
           </Grid>
-          <Grid xs={12} md={4}>
+          <Grid item xs={12} md={4}>
             <Skeleton variant="rectangular" height={300} />
           </Grid>
         </Grid>
@@ -352,7 +352,7 @@ const JobDetails = () => {
 
       <Grid container spacing={3}>
         {/* Main Content */}
-        <Grid xs={12} md={8}>
+        <Grid item xs={12} md={8}>
           <Paper sx={{ p: 3, mb: 3 }}>
             <Typography variant="h6" gutterBottom>
               Job Description
@@ -367,7 +367,7 @@ const JobDetails = () => {
               Job Details
             </Typography>
             <Grid container spacing={2}>
-              <Grid xs={12} sm={6}>
+              <Grid item xs={12} sm={6}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                   <LocationOn color="action" />
                   <Box>
@@ -383,7 +383,7 @@ const JobDetails = () => {
                 </Box>
               </Grid>
 
-              <Grid xs={12} sm={6}>
+              <Grid item xs={12} sm={6}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                   <Schedule color="action" />
                   <Box>
@@ -398,7 +398,7 @@ const JobDetails = () => {
                 </Box>
               </Grid>
 
-              <Grid xs={12} sm={6}>
+              <Grid item xs={12} sm={6}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                   <Timer color="action" />
                   <Box>
@@ -412,7 +412,7 @@ const JobDetails = () => {
                 </Box>
               </Grid>
 
-              <Grid xs={12} sm={6}>
+              <Grid item xs={12} sm={6}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                   <FitnessCenter color="action" />
                   <Box>
@@ -426,7 +426,7 @@ const JobDetails = () => {
                 </Box>
               </Grid>
 
-              <Grid xs={12} sm={6}>
+              <Grid item xs={12} sm={6}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                   <Build color="action" />
                   <Box>
@@ -513,7 +513,7 @@ const JobDetails = () => {
         </Grid>
 
         {/* Sidebar */}
-        <Grid xs={12} md={4}>
+        <Grid item xs={12} md={4}>
           {/* Employer Info */}
           <Paper sx={{ p: 3, mb: 3 }}>
             <Typography variant="h6" gutterBottom>

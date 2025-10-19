@@ -221,7 +221,7 @@ const Analytics = () => {
 
       {/* Overview Stats */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid xs={12} sm={6} md={2}>
+        <Grid item xs={12} sm={6} md={2}>
           <StatCard
             title="Total Jobs"
             value={analyticsData.overview.totalJobs}
@@ -230,7 +230,7 @@ const Analytics = () => {
             color={theme.palette.primary}
           />
         </Grid>
-        <Grid xs={12} sm={6} md={2}>
+        <Grid item xs={12} sm={6} md={2}>
           <StatCard
             title="Total Spent"
             value={`$${analyticsData.overview.totalSpent}`}
@@ -239,7 +239,7 @@ const Analytics = () => {
             color={theme.palette.success}
           />
         </Grid>
-        <Grid xs={12} sm={6} md={2}>
+        <Grid item xs={12} sm={6} md={2}>
           <StatCard
             title="Avg Cost"
             value={`$${analyticsData.overview.avgJobCost}`}
@@ -248,7 +248,7 @@ const Analytics = () => {
             color={theme.palette.warning}
           />
         </Grid>
-        <Grid xs={12} sm={6} md={2}>
+        <Grid item xs={12} sm={6} md={2}>
           <StatCard
             title="Workers Hired"
             value={analyticsData.overview.totalWorkers}
@@ -257,7 +257,7 @@ const Analytics = () => {
             color={theme.palette.info}
           />
         </Grid>
-        <Grid xs={12} sm={6} md={2}>
+        <Grid item xs={12} sm={6} md={2}>
           <StatCard
             title="Avg Time"
             value={`${analyticsData.overview.avgCompletionTime} days`}
@@ -266,7 +266,7 @@ const Analytics = () => {
             color={theme.palette.secondary}
           />
         </Grid>
-        <Grid xs={12} sm={6} md={2}>
+        <Grid item xs={12} sm={6} md={2}>
           <StatCard
             title="Avg Rating"
             value={analyticsData.overview.avgRating}
@@ -280,7 +280,7 @@ const Analytics = () => {
       {/* Charts */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         {/* Jobs Over Time */}
-        <Grid xs={12} md={8}>
+        <Grid item xs={12} md={8}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
               Jobs & Spending Trend
@@ -314,7 +314,7 @@ const Analytics = () => {
         </Grid>
 
         {/* Category Distribution */}
-        <Grid xs={12} md={4}>
+        <Grid item xs={12} md={4}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
               Jobs by Category
@@ -342,7 +342,7 @@ const Analytics = () => {
         </Grid>
 
         {/* Bids per Job */}
-        <Grid xs={12} md={6}>
+        <Grid item xs={12} md={6}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
               Bids per Job Distribution
@@ -360,7 +360,7 @@ const Analytics = () => {
         </Grid>
 
         {/* Completion Rates */}
-        <Grid xs={12} md={6}>
+        <Grid item xs={12} md={6}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
               Job Completion Rates
