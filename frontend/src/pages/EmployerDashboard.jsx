@@ -332,7 +332,7 @@ const EmployerDashboard = () => {
       <Box>
         <Grid container spacing={3}>
           {[1, 2, 3, 4].map((item) => (
-            <Grid item xs={12} sm={6} md={3} key={item}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }} key={item}>
               <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 2 }} />
             </Grid>
           ))}
@@ -373,7 +373,7 @@ const EmployerDashboard = () => {
 
       {/* Stats Grid */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{xs:12,sm:6,md:3}}>
           <StatCard
             title="Total Jobs Posted"
             value={stats?.total_jobs_posted || 0}
@@ -383,7 +383,7 @@ const EmployerDashboard = () => {
             trend={15}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{xs:12,sm:6,md:3}}>
           <StatCard
             title="Active Jobs"
             value={stats?.active_jobs || 0}
@@ -392,7 +392,7 @@ const EmployerDashboard = () => {
             subtitle="Currently open"
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{xs:12,sm:6,md:3}}>
           <StatCard
             title="In Progress"
             value={stats?.in_progress_jobs || 0}
@@ -401,7 +401,7 @@ const EmployerDashboard = () => {
             subtitle="Being worked on"
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{xs:12,sm:6,md:3}}>
           <StatCard
             title="Completed"
             value={stats?.completed_jobs || 0}
@@ -415,7 +415,7 @@ const EmployerDashboard = () => {
 
       {/* Active Jobs Table */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12}>
+        <Grid size={{xs:12}}>
           <Paper sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
               <Typography variant="h6" fontWeight="medium">
@@ -466,7 +466,7 @@ const EmployerDashboard = () => {
 
       {/* Recent Activity and Quick Stats */}
       <Grid container spacing={3}>
-        <Grid item xs={12} md={8}>
+        <Grid size={{xs:12,md:8}}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" fontWeight="medium" gutterBottom>
               Recent Bids on Your Jobs
@@ -492,7 +492,7 @@ const EmployerDashboard = () => {
           </Paper>
         </Grid>
 
-        <Grid item xs={12} md={4}>
+        <Grid size={{xs:12,md:4}}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" fontWeight="medium" gutterBottom>
               Quick Stats

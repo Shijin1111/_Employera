@@ -251,7 +251,7 @@ const JobSeekerDashboard = () => {
       <Box>
         <Grid container spacing={3}>
           {[1, 2, 3, 4].map((item) => (
-            <Grid item xs={12} sm={6} md={3} key={item}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }} key={item}>
               <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 2 }} />
             </Grid>
           ))}
@@ -277,7 +277,7 @@ const JobSeekerDashboard = () => {
 
       {/* Stats Grid */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{xs:12,sm:6,md:3}}>
           <StatCard
             title="Total Bids"
             value={stats?.total_bids || 0}
@@ -286,7 +286,7 @@ const JobSeekerDashboard = () => {
             trend={12}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{xs:12,sm:6,md:3}}>
           <StatCard
             title="Pending Bids"
             value={stats?.pending_bids || 0}
@@ -294,7 +294,7 @@ const JobSeekerDashboard = () => {
             color={theme.palette.warning.main}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{xs:12,sm:6,md:3}}>
           <StatCard
             title="Jobs Won"
             value={stats?.accepted_bids || 0}
@@ -303,7 +303,7 @@ const JobSeekerDashboard = () => {
             trend={8}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{xs:12,sm:6,md:3}}>
           <StatCard
             title="Avg Rating"
             value={stats?.average_rating?.toFixed(1) || '0.0'}
@@ -315,7 +315,7 @@ const JobSeekerDashboard = () => {
 
       {/* Earnings Overview */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={8}>
+                <Grid size={{xs:12,md:8}}>
           <Paper sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
               <Typography variant="h6" fontWeight="medium">
@@ -333,12 +333,12 @@ const JobSeekerDashboard = () => {
             <Grid container spacing={2}>
               {recommendedJobs.length > 0 ? (
                 recommendedJobs.map((job) => (
-                  <Grid item xs={12} md={6} key={job.id}>
+                  <Grid size={{ xs: 12, sm: 6 }} key={job.id}>
                     <JobCard job={job} onViewDetails={handleViewJobDetails} />
                   </Grid>
                 ))
               ) : (
-                <Grid item xs={12}>
+                <Grid size={{xs:12}}>
                   <Alert severity="info">
                     No recommended jobs at the moment. Check back later!
                   </Alert>
@@ -358,7 +358,7 @@ const JobSeekerDashboard = () => {
           </Paper>
         </Grid>
 
-        <Grid item xs={12} md={4}>
+        <Grid size={{xs:12,md:4}}>
           <Paper sx={{ p: 3, height: '100%' }}>
             <Typography variant="h6" fontWeight="medium" gutterBottom>
               Active Bids
@@ -395,7 +395,7 @@ const JobSeekerDashboard = () => {
           Quick Actions
         </Typography>
         <Grid container spacing={2}>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid size={{xs:12,sm:6,md:3}}>
             <Button
               fullWidth
               variant="outlined"
@@ -406,7 +406,7 @@ const JobSeekerDashboard = () => {
               Browse Jobs
             </Button>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid size={{xs:12,sm:6,md:3}}>
             <Button
               fullWidth
               variant="outlined"
@@ -417,7 +417,7 @@ const JobSeekerDashboard = () => {
               My Reviews
             </Button>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid size={{xs:12,sm:6,md:3}}>
             <Button
               fullWidth
               variant="outlined"
@@ -428,7 +428,7 @@ const JobSeekerDashboard = () => {
               Set Availability
             </Button>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid size={{xs:12,sm:6,md:3}}>
             <Button
               fullWidth
               variant="outlined"

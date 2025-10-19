@@ -97,7 +97,7 @@ const AvailabilitySchedule = ({ availability, onChange, editMode }) => {
       </Typography>
       <Grid container spacing={2}>
         {daysOfWeek.map((day, dayIndex) => (
-          <Grid item xs={12} key={day}>
+          <Grid size={{ xs: 12}} key={day}>
             <Paper sx={{ p: 2 }}>
               <Typography variant="subtitle2" gutterBottom>
                 {day}
@@ -325,10 +325,10 @@ const Profile = () => {
       <Box>
         <Skeleton variant="rectangular" height={200} sx={{ mb: 3 }} />
         <Grid container spacing={3}>
-          <Grid item xs={12} md={4}>
+          <Grid size={{xs:12,md:4}}>
             <Skeleton variant="rectangular" height={400} />
           </Grid>
-          <Grid item xs={12} md={8}>
+        <Grid size={{xs:12,md:8}}>
             <Skeleton variant="rectangular" height={400} />
           </Grid>
         </Grid>
@@ -450,7 +450,7 @@ const Profile = () => {
 
       <Grid container spacing={3}>
         {/* Left Sidebar */}
-        <Grid item xs={12} md={4}>
+        <Grid size={{xs:12,md:4}}>
           {/* Stats Card */}
           <Paper sx={{ p: 3, mb: 3 }}>
             <Typography variant="h6" gutterBottom>
@@ -581,7 +581,7 @@ const Profile = () => {
         </Grid>
 
         {/* Main Content */}
-        <Grid item xs={12} md={8}>
+                <Grid size={{xs:12,md:8}}>
           <Paper sx={{ p: 3 }}>
             <Tabs value={tabValue} onChange={(e, v) => setTabValue(v)}>
               <Tab label="About" />
@@ -727,7 +727,7 @@ const Profile = () => {
                   <Grid container spacing={2}>
                     {portfolio.length > 0 ? (
                       portfolio.map((item) => (
-                        <Grid item xs={12} sm={6} md={4} key={item.id}>
+                        <Grid size={{ xs: 12, sm: 6, md: 4 }} key={item.id}>
                           <PortfolioItem
                             item={item}
                             onDelete={(id) => setPortfolio(portfolio.filter(p => p.id !== id))}
@@ -736,7 +736,7 @@ const Profile = () => {
                         </Grid>
                       ))
                     ) : (
-                      <Grid item xs={12}>
+                      <Grid size={{xs:12}}>
                         <Alert severity="info">
                           No portfolio items yet. Add photos of your work to showcase your skills!
                         </Alert>

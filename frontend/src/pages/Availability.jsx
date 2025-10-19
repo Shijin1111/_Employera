@@ -215,7 +215,7 @@ const Availability = () => {
 
       {/* Quick Actions */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={4}>
+        <Grid size={{xs:12,md:4}}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="subtitle1" gutterBottom fontWeight="medium">
               Quick Settings
@@ -250,7 +250,7 @@ const Availability = () => {
           </Paper>
         </Grid>
 
-        <Grid item xs={12} md={8}>
+        <Grid size={{xs:12,md:8}}>
           <Paper sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="subtitle1" fontWeight="medium">
@@ -288,7 +288,7 @@ const Availability = () => {
 
       {/* Stats */}
       <Grid container spacing={3}>
-        <Grid item xs={12} md={4}>
+        <Grid size={{xs:12,md:4}}>
           <Paper sx={{ p: 3, textAlign: 'center' }}>
             <CalendarMonth sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
             <Typography variant="h4" fontWeight="bold">
@@ -300,7 +300,7 @@ const Availability = () => {
           </Paper>
         </Grid>
         
-        <Grid item xs={12} md={4}>
+        <Grid size={{xs:12,md:4}}>
           <Paper sx={{ p: 3, textAlign: 'center' }}>
             <AccessTime sx={{ fontSize: 48, color: 'success.main', mb: 2 }} />
             <Typography variant="h4" fontWeight="bold">
@@ -319,7 +319,7 @@ const Availability = () => {
           </Paper>
         </Grid>
         
-        <Grid item xs={12} md={4}>
+        <Grid size={{xs:12,md:4}}>
           <Paper sx={{ p: 3, textAlign: 'center' }}>
             <Today sx={{ fontSize: 48, color: 'info.main', mb: 2 }} />
             <Typography variant="h4" fontWeight="bold">

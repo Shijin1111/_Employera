@@ -193,7 +193,7 @@ const BidCard = ({ bid, onUpdate, onWithdraw, onViewJob }) => {
         <Divider sx={{ my: 2 }} />
 
         <Grid container spacing={2}>
-          <Grid item xs={12} sm={4}>
+          <Grid size={{xs:12,sm:4}}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <LocationOn sx={{ fontSize: 18, color: 'text.secondary' }} />
               <Box>
@@ -207,7 +207,7 @@ const BidCard = ({ bid, onUpdate, onWithdraw, onViewJob }) => {
             </Box>
           </Grid>
           
-          <Grid item xs={12} sm={4}>
+          <Grid size={{xs:12,sm:4}}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Schedule sx={{ fontSize: 18, color: 'text.secondary' }} />
               <Box>
@@ -221,7 +221,7 @@ const BidCard = ({ bid, onUpdate, onWithdraw, onViewJob }) => {
             </Box>
           </Grid>
           
-          <Grid item xs={12} sm={4}>
+          <Grid size={{xs:12,sm:4}}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Person sx={{ fontSize: 18, color: 'text.secondary' }} />
               <Box>
@@ -441,7 +441,7 @@ const MyBids = () => {
         <Skeleton variant="rectangular" height={200} sx={{ mb: 3 }} />
         <Grid container spacing={3}>
           {[1, 2, 3, 4].map((item) => (
-            <Grid item xs={12} sm={6} md={3} key={item}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }} key={item}>
               <Skeleton variant="rectangular" height={120} />
             </Grid>
           ))}
@@ -464,7 +464,7 @@ const MyBids = () => {
 
       {/* Stats Grid */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{xs:12,sm:6,md:3}}>
           <StatsCard
             title="Total Bids"
             value={stats.total}
@@ -473,7 +473,7 @@ const MyBids = () => {
             trend={12}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{xs:12,sm:6,md:3}}>
           <StatsCard
             title="Pending"
             value={stats.pending}
@@ -481,7 +481,7 @@ const MyBids = () => {
             color={theme.palette.warning}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{xs:12,sm:6,md:3}}>
           <StatsCard
             title="Accepted"
             value={stats.accepted}
@@ -490,7 +490,7 @@ const MyBids = () => {
             trend={8}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{xs:12,sm:6,md:3}}>
           <StatsCard
             title="Success Rate"
             value={`${stats.total > 0 ? Math.round((stats.accepted / stats.total) * 100) : 0}%`}

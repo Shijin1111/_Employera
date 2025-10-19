@@ -332,7 +332,7 @@ const fetchJobs = async () => {
       {/* Search and Filters */}
       <Paper sx={{ p: 3, mb: 3 }}>
         <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} md={6}>
+                  <Grid size={{xs:12,md:6}}>
             <TextField
               fullWidth
               placeholder="Search jobs..."
@@ -348,7 +348,7 @@ const fetchJobs = async () => {
               }}
             />
           </Grid>
-          <Grid item xs={12} md={2}>
+          <Grid size={{xs:12,md:2}}>
             <FormControl fullWidth>
               <InputLabel>Category</InputLabel>
                 <Select
@@ -366,7 +366,7 @@ const fetchJobs = async () => {
                 </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} md={2}>
+          <Grid size={{xs:12,md:2}}>
             <FormControl fullWidth>
               <InputLabel>Urgency</InputLabel>
               <Select
@@ -382,7 +382,7 @@ const fetchJobs = async () => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} md={2}>
+          <Grid size={{xs:12,md:2}}>
             <Button
               fullWidth
               variant="contained"
@@ -405,7 +405,7 @@ const fetchJobs = async () => {
           </AccordionSummary>
           <AccordionDetails>
             <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>
+                      <Grid size={{xs:12,md:6}}>
                 <Typography gutterBottom>Price Range</Typography>
                 <Slider
                   value={priceRange}
@@ -420,7 +420,7 @@ const fetchJobs = async () => {
                   ]}
                 />
               </Grid>
-              <Grid item xs={12} md={6}>
+                      <Grid size={{xs:12,md:6}}>
                 <TextField
                   fullWidth
                   label="Location"
@@ -458,7 +458,7 @@ const fetchJobs = async () => {
       {loading ? (
         <Grid container spacing={3}>
           {[1, 2, 3, 4, 5, 6].map((item) => (
-            <Grid item xs={12} md={viewType === 'grid' ? 4 : 12} key={item}>
+            <Grid size={{ xs: 12, md: viewType === 'grid' ? 4 : 12 }} key={item}>
               <Skeleton variant="rectangular" height={250} sx={{ borderRadius: 2 }} />
             </Grid>
           ))}
@@ -467,7 +467,7 @@ const fetchJobs = async () => {
         <>
           <Grid container spacing={3}>
             {jobs.map((job) => (
-              <Grid item xs={12} md={viewType === 'grid' ? 4 : 12} key={job.id}>
+              <Grid size={{ xs: 12, md: viewType === 'grid' ? 4 : 12 }} key={job.id}>
                 <JobCard
                   job={job}
                   view={viewType}

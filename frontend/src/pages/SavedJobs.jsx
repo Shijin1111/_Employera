@@ -232,7 +232,7 @@ const SavedJobs = () => {
         <Skeleton variant="rectangular" height={60} sx={{ mb: 3 }} />
         <Grid container spacing={3}>
           {[1, 2, 3, 4, 5, 6].map((item) => (
-            <Grid item xs={12} sm={6} md={4} key={item}>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}key={item}>
               <Skeleton variant="rectangular" height={300} />
             </Grid>
           ))}
@@ -256,7 +256,7 @@ const SavedJobs = () => {
       {/* Filters */}
       <Paper sx={{ p: 3, mb: 3 }}>
         <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} md={4}>
+        <Grid size={{xs:12,md:4}}>
             <TextField
               fullWidth
               placeholder="Search saved jobs..."
@@ -272,7 +272,7 @@ const SavedJobs = () => {
             />
           </Grid>
           
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid size={{xs:12,sm:6,md:3}}>
             <FormControl fullWidth>
               <InputLabel>Sort By</InputLabel>
               <Select
@@ -288,7 +288,7 @@ const SavedJobs = () => {
             </FormControl>
           </Grid>
           
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid size={{xs:12,sm:6,md:3}}>
             <FormControl fullWidth>
               <InputLabel>Urgency</InputLabel>
               <Select
@@ -305,7 +305,7 @@ const SavedJobs = () => {
             </FormControl>
           </Grid>
           
-          <Grid item xs={12} md={2}>
+        <Grid size={{xs:12,md:2}}>
             <Typography variant="body2" color="text.secondary">
               {sortedJobs.length} saved job{sortedJobs.length !== 1 ? 's' : ''}
             </Typography>
@@ -317,7 +317,7 @@ const SavedJobs = () => {
       {sortedJobs.length > 0 ? (
         <Grid container spacing={3}>
           {sortedJobs.map((savedJob) => (
-            <Grid item xs={12} sm={6} md={4} key={savedJob.id}>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={savedJob.id}>
               <SavedJobCard
                 savedJob={savedJob}
                 onRemove={handleRemoveSavedJob}
