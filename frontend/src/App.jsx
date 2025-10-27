@@ -18,7 +18,8 @@ import SavedJobs from './pages/SavedJobs';
 import Reviews from './pages/Reviews';
 import Availability from './pages/Availability';
 import Analytics from './pages/Analytics';
-// import Profile from './pages/Profile';
+import Workers from './pages/Workers';
+import History from './pages/History';
 
 function App() {
   return (
@@ -85,6 +86,15 @@ function App() {
                 }
               />
               
+              <Route
+                path="/jobseeker/history"
+                element={
+                  <ProtectedRoute allowedRoles={['jobseeker']}>
+                    <History />
+                  </ProtectedRoute>
+                }
+              />
+              
               {/* Employer Routes */}
               <Route
                 path="/employer/dashboard"
@@ -109,6 +119,24 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={['employer']}>
                     <EmployerJobs />
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
+                path="/employer/workers"
+                element={
+                  <ProtectedRoute allowedRoles={['employer']}>
+                    <Workers />
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
+                path="/employer/history"
+                element={
+                  <ProtectedRoute allowedRoles={['employer']}>
+                    <History />
                   </ProtectedRoute>
                 }
               />

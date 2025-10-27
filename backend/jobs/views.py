@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db.models import Q, Count, Min, Avg
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from .models import (
     Job, JobCategory, Skill, Bid, Review, 
     SavedJob, JobTemplate, WorkerAvailability
@@ -222,6 +223,16 @@ class BidUpdateView(generics.UpdateAPIView):
         
         return super().update(request, *args, **kwargs)
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from django.shortcuts import get_object_or_404
+from .models import Job, Bid
+from .serializers import BidSerializer
+
+# ...
+
 class AcceptBidView(APIView):
     permission_classes = [IsAuthenticated]
     
@@ -229,30 +240,75 @@ class AcceptBidView(APIView):
         job = get_object_or_404(Job, id=job_id)
         bid = get_object_or_404(Bid, id=bid_id, job=job)
         
-        # Only employer can accept bid
+        # 1. Authorization check
         if job.employer != request.user:
             return Response(
                 {'error': 'Only the employer can accept bids'},
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        # Update bid status
+        # 2. Prevent re-accepting a bid
+        if bid.status == 'accepted':
+             return Response(
+                {'error': 'This bid has already been accepted.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # 3. NEW LOGIC: Check worker limit
+        # Count how many bids are *already* accepted
+        current_accepted_count = job.bids.filter(status='accepted').count()
+        
+        if current_accepted_count >= job.number_of_workers:
+            return Response(
+                {'error': f'You have already accepted the maximum number of workers ({job.number_of_workers}) for this job.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # 4. Accept the bid
         bid.status = 'accepted'
         bid.save()
         
-        # Update job
-        job.selected_bid = bid
-        job.status = 'in_progress'
-        job.save()
-        
-        # Reject other bids
-        job.bids.exclude(id=bid.id).update(status='rejected')
-        
+        # 5. Update job status to 'in_progress' (if it's not already)
+        if job.status == 'open':
+            job.status = 'in_progress'
+            job.save()
+
+        # 6. Return success
+        # As requested, we do NOT auto-reject other pending bids.
         return Response({
-            'message': 'Bid accepted successfully',
+            'message': 'Bid accepted successfully.',
             'bid': BidSerializer(bid).data
         })
 
+# Make sure you still have your RejectBidView
+class RejectBidView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, job_id, bid_id):
+        job = get_object_or_404(Job, id=job_id)
+        bid = get_object_or_404(Bid, id=bid_id, job=job)
+        
+        if job.employer != request.user:
+            return Response(
+                {'error': 'Only the employer can reject bids'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # You can't reject a bid that's already in progress
+        if bid.status == 'accepted':
+             return Response(
+                {'error': 'Cannot reject an already accepted bid. You may need to cancel the job.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        bid.status = 'rejected'
+        bid.save()
+        
+        return Response({
+            'message': 'Bid rejected successfully',
+            'bid': BidSerializer(bid).data
+        })
+        
 class SaveJobView(APIView):
     permission_classes = [IsAuthenticated]
     
@@ -375,6 +431,203 @@ def dashboard_stats(request):
             'total_earned': 0,  # Calculate from completed jobs
             'average_rating': user.rating,
             'total_reviews': user.total_reviews,
+        }
+    
+    return Response(stats)
+
+# Add these imports at the top
+from django.contrib.auth import get_user_model
+from django.db.models import Q, Count, Min, Avg, Sum, F
+
+User = get_user_model()
+from accounts.serializers import UserSerializer
+# Add these new views
+
+class WorkersListView(generics.ListAPIView):
+    """List all workers for employers to browse"""
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['first_name', 'last_name', 'skills', 'bio']
+    ordering_fields = ['rating', 'total_reviews', 'hourly_rate']
+    ordering = ['-rating']
+    
+    def get_queryset(self):
+        # Only show job seekers (workers)
+        queryset = User.objects.filter(account_type='jobseeker')
+        
+        # Filter by skills if provided
+        skills = self.request.query_params.get('skills', None)
+        if skills:
+            skills_list = skills.split(',')
+            queryset = queryset.filter(skills__overlap=skills_list)
+        
+        # Filter by location
+        location = self.request.query_params.get('location', None)
+        if location:
+            queryset = queryset.filter(location__icontains=location)
+        
+        # Filter by minimum rating
+        min_rating = self.request.query_params.get('min_rating', None)
+        if min_rating:
+            queryset = queryset.filter(rating__gte=min_rating)
+        
+        # Filter by hourly rate range
+        min_rate = self.request.query_params.get('min_rate', None)
+        max_rate = self.request.query_params.get('max_rate', None)
+        if min_rate:
+            queryset = queryset.filter(hourly_rate__gte=min_rate)
+        if max_rate:
+            queryset = queryset.filter(hourly_rate__lte=max_rate)
+        
+        return queryset
+
+class FavoriteWorkersView(generics.ListAPIView):
+    """Get employer's favorite workers"""
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        # Get workers who have successfully completed jobs for this employer
+        return User.objects.filter(
+            account_type='jobseeker',
+            bids__job__employer=self.request.user,
+            bids__status='accepted',
+            bids__job__status='completed'
+        ).distinct().annotate(
+            jobs_together=Count('bids')
+        ).order_by('-jobs_together')
+
+class RecentWorkersView(generics.ListAPIView):
+    """Get recently hired workers"""
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        # Get workers hired in the last 30 days
+        from datetime import datetime, timedelta
+        thirty_days_ago = datetime.now() - timedelta(days=30)
+        
+        return User.objects.filter(
+            account_type='jobseeker',
+            bids__job__employer=self.request.user,
+            bids__status='accepted',
+            bids__created_at__gte=thirty_days_ago
+        ).distinct().order_by('-bids__created_at')
+
+class JobHistoryView(generics.ListAPIView):
+    """Get completed and cancelled jobs for history page"""
+    serializer_class = JobDetailSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        user = self.request.user
+        status_filter = self.request.query_params.get('status', 'completed')
+        
+        if user.account_type == 'employer':
+            queryset = Job.objects.filter(
+                employer=user,
+                status__in=['completed', 'cancelled']
+            )
+        else:
+            # Jobs where user's bid was accepted
+            queryset = Job.objects.filter(
+                bids__worker=user,
+                bids__status='accepted',
+                status__in=['completed', 'cancelled']
+            )
+        
+        if status_filter:
+            queryset = queryset.filter(status=status_filter)
+        
+        # Annotate with review status
+        queryset = queryset.annotate(
+            has_review=Count('reviews', filter=Q(reviews__reviewer=user))
+        )
+        
+        # Include related data
+        queryset = queryset.select_related('employer', 'category', 'selected_bid')
+        queryset = queryset.prefetch_related('reviews', 'bids')
+        
+        return queryset.order_by('-completion_date', '-posted_date')
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def complete_job(request, job_id):
+    """Mark a job as completed"""
+    try:
+        job = Job.objects.get(id=job_id)
+        
+        # Check if user is the employer of this job
+        if job.employer != request.user:
+            return Response(
+                {'error': 'Only the employer can mark a job as completed'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Check if job is in progress
+        if job.status != 'in_progress':
+            return Response(
+                {'error': 'Only jobs in progress can be marked as completed'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Mark job as completed
+        job.status = 'completed'
+        job.completion_date = timezone.now()
+        job.save()
+        
+        return Response({
+            'success': True,
+            'message': 'Job marked as completed successfully'
+        })
+    except Job.DoesNotExist:
+        return Response(
+            {'error': 'Job not found'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def history_stats(request):
+    """Get statistics for history page"""
+    user = request.user
+    
+    if user.account_type == 'employer':
+        jobs = Job.objects.filter(employer=user)
+        completed_jobs = jobs.filter(status='completed')
+        
+        stats = {
+            'total': jobs.count(),
+            'completed': completed_jobs.count(),
+            'cancelled': jobs.filter(status='cancelled').count(),
+            'total_spent': completed_jobs.aggregate(
+                total=Sum('selected_bid__amount')
+            )['total'] or 0,
+            'pending_reviews': completed_jobs.exclude(
+                reviews__reviewer=user
+            ).count(),
+        }
+    else:
+        # For job seekers
+        jobs = Job.objects.filter(
+            bids__worker=user,
+            bids__status='accepted'
+        )
+        completed_jobs = jobs.filter(status='completed')
+        
+        stats = {
+            'total': jobs.count(),
+            'completed': completed_jobs.count(),
+            'cancelled': jobs.filter(status='cancelled').count(),
+            'total_earned': Bid.objects.filter(
+                worker=user,
+                status='accepted',
+                job__status='completed'
+            ).aggregate(total=Sum('amount'))['total'] or 0,
+            'pending_reviews': completed_jobs.exclude(
+                reviews__reviewer=user
+            ).count(),
         }
     
     return Response(stats)

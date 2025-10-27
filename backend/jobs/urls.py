@@ -23,10 +23,21 @@ urlpatterns = [
     path('jobs/<uuid:job_id>/bids/create/', BidCreateView.as_view(), name='bid-create'),
     path('bids/<uuid:pk>/', BidUpdateView.as_view(), name='bid-update'),
     path('jobs/<uuid:job_id>/bids/<uuid:bid_id>/accept/', AcceptBidView.as_view(), name='accept-bid'),
+    path('jobs/<uuid:job_id>/bids/<uuid:bid_id>/reject/', RejectBidView.as_view(), name='reject-bid'),
     path('jobs/<uuid:job_id>/save/', SaveJobView.as_view(), name='save-job'),
     path('saved-jobs/', SavedJobsListView.as_view(), name='saved-jobs'),
     path('jobs/<uuid:job_id>/review/', ReviewCreateView.as_view(), name='create-review'),
     path('dashboard/stats/', dashboard_stats, name='dashboard-stats'),
+    
+    # Workers endpoints
+    path('workers/', WorkersListView.as_view(), name='workers-list'),
+    path('workers/favorites/', FavoriteWorkersView.as_view(), name='favorite-workers'),
+    path('workers/recent/', RecentWorkersView.as_view(), name='recent-workers'),
+    
+    # History endpoints
+    path('history/', JobHistoryView.as_view(), name='job-history'),
+    path('history/stats/', history_stats, name='history-stats'),
+    path('jobs/<uuid:job_id>/complete/', complete_job, name='complete-job'),
     
     # Review URLs
     path('reviews/received/', ReceivedReviewsView.as_view(), name='received-reviews'),

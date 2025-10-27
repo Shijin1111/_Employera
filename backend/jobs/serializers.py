@@ -134,3 +134,126 @@ class WorkerAvailabilitySerializer(serializers.ModelSerializer):
         model = WorkerAvailability
         fields = '__all__'
         read_only_fields = ['id', 'worker']
+        
+        # Update JobDetailSerializer to include worker info
+from .models import Job, SavedJob, Bid # Make sure to import SavedJob and Bid
+from .serializers import UserSerializer, JobCategorySerializer, SkillSerializer, BidSerializer # Import your other serializers
+
+# ...
+
+class JobDetailSerializer(serializers.ModelSerializer):
+    employer = UserSerializer(read_only=True)
+    category = JobCategorySerializer(read_only=True)
+    skills_required = SkillSerializer(many=True, read_only=True)
+    
+    # We only show bids if the user is the employer
+    bids = serializers.SerializerMethodField()
+    bid_count = serializers.IntegerField(read_only=True) # Assumes this is annotated in the view
+    
+    # Custom fields for the request.user
+    user_has_bid = serializers.SerializerMethodField()
+    user_bid = serializers.SerializerMethodField()
+    is_saved = serializers.SerializerMethodField()
+    
+    # Fields for completed jobs
+    has_review = serializers.BooleanField(read_only=True, default=False) # Assumes this is annotated
+    worker = serializers.SerializerMethodField() 
+    final_amount = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Job
+        # DO NOT USE '__all__'. Explicitly list your fields.
+        fields = [
+            'id', 'employer', 'title', 'description', 'category', 'skills_required',
+            'location_type', 'address', 'city', 'state', 'zip_code', 'latitude', 'longitude',
+            'posted_date', 'start_date', 'start_time', 'end_date', 'estimated_duration',
+            'is_flexible', 'urgency', 'budget_min', 'budget_max', 'instant_hire_price',
+            'number_of_workers', 'tools_provided', 'tools_required', 'physical_requirements',
+            'auto_match_enabled', 'auto_match_min_rating', 'auto_match_max_distance',
+            'status', 'completion_date', 'images', 'is_featured', 'view_count',
+            
+            # Serializer fields
+            'bids', 'bid_count', 'user_has_bid', 'user_bid', 'is_saved', 'has_review',
+            'worker', 'final_amount'
+        ]
+        read_only_fields = ['id', 'posted_date', 'view_count']
+
+    def get_user_has_bid(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.bids.filter(worker=request.user).exists()
+        return False
+
+    def get_user_bid(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            bid = obj.bids.filter(worker=request.user).first()
+            return BidSerializer(bid).data if bid else None
+        return None
+
+    def get_is_saved(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            # Assumes your SavedJob model is imported
+            return SavedJob.objects.filter(user=request.user, job=obj).exists()
+        return False
+
+    def get_bids(self, obj):
+        """
+        Only show the list of bids to the job employer.
+        """
+        request = self.context.get('request')
+        if request and request.user == obj.employer:
+            # Pass context to BidSerializer if it needs the request
+            return BidSerializer(obj.bids.all(), many=True, context=self.context).data
+        # Return an empty list for non-employers
+        return []
+
+    # --- YOU MUST ADD LOGIC TO THESE METHODS ---
+    
+    def get_worker(self, obj):
+        """
+        Logic to get the accepted worker(s) info after job is in_progress/completed.
+        """
+        if obj.status in ['in_progress', 'completed']:
+            # Get all accepted bids
+            accepted_bids = obj.bids.filter(status='accepted')
+            # Get all workers from those bids
+            workers = [bid.worker for bid in accepted_bids]
+            # Serialize the worker data
+            return UserSerializer(workers, many=True, context=self.context).data
+        return None # Or []
+
+    def get_final_amount(self, obj):
+        """
+        Logic to get the final agreed-upon price(s).
+        """
+        if obj.status in ['in_progress', 'completed']:
+            # Get all accepted bids
+            accepted_bids = obj.bids.filter(status='accepted')
+            # You could sum them, or return a list of amounts
+            total_amount = sum(bid.amount for bid in accepted_bids)
+            return total_amount
+        return None
+    
+    
+from .models import User
+
+# Add a serializer for worker listing
+class WorkerSerializer(serializers.ModelSerializer):
+    completed_jobs = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = User
+        fields = [
+            'id', 'email', 'first_name', 'last_name', 'phone',
+            'profile_picture', 'bio', 'location', 'skills',
+            'hourly_rate', 'availability', 'rating', 'total_reviews',
+            'is_verified', 'date_joined', 'completed_jobs'
+        ]
+    
+    def get_completed_jobs(self, obj):
+        return Job.objects.filter(
+            selected_bid__worker=obj,
+            status='completed'
+        ).count()

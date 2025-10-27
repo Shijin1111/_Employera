@@ -38,6 +38,7 @@ import {
   Star,
   Groups,
   Assignment,
+  Assessment,
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme as useAppTheme } from '../../theme/ThemeProvider';
@@ -74,11 +75,12 @@ const Layout = () => {
 
   const menuItems = isEmployer
     ? [
-        { text: 'Dashboard', icon: <Dashboard />, path: '/employer/dashboard' },
-        { text: 'Post New Job', icon: <Add />, path: '/employer/post-job' },
-        { text: 'My Jobs', icon: <Assignment />, path: '/employer/jobs' },
-        { text: 'Workers', icon: <Groups />, path: '/employer/workers' },
-        { text: 'History', icon: <History />, path: '/employer/history' },
+             { text: 'Dashboard', icon: <Dashboard />, path: '/employer/dashboard' },
+      { text: 'Post New Job', icon: <Add />, path: '/employer/post-job' },
+      { text: 'My Jobs', icon: <Assignment />, path: '/employer/jobs' },
+      { text: 'Workers', icon: <Groups />, path: '/employer/workers' },
+      { text: 'History', icon: <History />, path: '/employer/history' },
+      { text: 'Analytics', icon: <Assessment />, path: '/employer/analytics' },
       ]
     : [
         { text: 'Dashboard', icon: <Dashboard />, path: '/jobseeker/dashboard' },

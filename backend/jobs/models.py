@@ -126,10 +126,6 @@ class Job(models.Model):
     
     # Status
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
-    selected_bid = models.OneToOneField(
-        'Bid', on_delete=models.SET_NULL, null=True, blank=True,
-        related_name='selected_for_job'
-    )
     completion_date = models.DateTimeField(null=True, blank=True)
     
     # Additional

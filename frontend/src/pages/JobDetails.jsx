@@ -246,6 +246,22 @@ const JobDetails = () => {
       console.error('Error rejecting bid:', error);
     }
   };
+  // Add this function after other handlers:
+  const handleCompleteJob = async () => {
+    try {
+      const response = await api.post(`/jobs/${id}/complete/`);
+      if (response.data.success) {
+        // Refresh job details
+        fetchJobDetails();
+        alert('Job marked as completed successfully! You can now leave a review.');
+      }
+    } catch (error) {
+      console.error('Error completing job:', error);
+      alert('Failed to complete job. Please try again.');
+    }
+  };
+
+ 
 
   if (loading) {
     return (
@@ -600,6 +616,21 @@ const JobDetails = () => {
             )}
           </Paper>
 
+          {/* Add this button in the sidebar for employers when job is in_progress */}
+          {isOwner && job.status === 'in_progress' && (
+            <Box sx={{ mb: 2 }}>
+              <Button
+                fullWidth
+                variant="contained"
+                color="success"
+                size="large"
+                startIcon={<CheckCircle />}
+                onClick={handleCompleteJob}
+              >
+                Mark as Completed
+              </Button>
+            </Box>
+          )}
           {/* Action Buttons */}
           {isJobSeeker && job.status === 'open' && (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
