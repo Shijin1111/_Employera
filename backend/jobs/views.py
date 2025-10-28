@@ -404,32 +404,109 @@ class ReviewCreateView(generics.CreateAPIView):
         
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+import datetime
+from django.utils import timezone
+from django.db.models import Sum, Avg, Q
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from django.contrib.auth import get_user_model
+
+# --- IMPORTANT: IMPORT YOUR MODELS ---
+# (Adjust these paths to match your project structure)
+from jobs.models import Job, Bid 
+User = get_user_model()
+
+
+# Helper function (no changes needed)
+def calculate_trend(current_count, last_month_count):
+    if last_month_count > 0:
+        return round(((current_count - last_month_count) / last_month_count) * 100)
+    elif current_count > 0:
+        return 100
+    else:
+        return 0
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def dashboard_stats(request):
-    """Get dashboard statistics for the current user"""
     user = request.user
     
+    today = timezone.now().date()
+    current_month_start = today.replace(day=1)
+    last_month_end = current_month_start - datetime.timedelta(days=1)
+    last_month_start = last_month_end.replace(day=1)
+    
     if user.account_type == 'employer':
+        employer_jobs = Job.objects.filter(employer=user)
+        completed_jobs_qs = employer_jobs.filter(status='completed')
+
+        # --- Calculate Spending (Fixed) ---
+        accepted_bids_qs = Bid.objects.filter(
+            job__in=completed_jobs_qs, 
+            status='accepted'
+        )
+        spending_agg = accepted_bids_qs.aggregate(
+            total_spent=Sum('amount'),
+            average_cost=Avg('amount')
+        )
+
+        # --- Trend 1: Total Jobs Posted (No change) ---
+        current_month_posted = employer_jobs.filter(
+            posted_date__gte=current_month_start
+        ).count()
+        last_month_posted = employer_jobs.filter(
+            posted_date__gte=last_month_start,
+            posted_date__lt=current_month_start
+        ).count()
+        total_jobs_trend = calculate_trend(current_month_posted, last_month_posted)
+
+        # --- Trend 2: Completed Jobs (FIXED) ---
+        # Using 'completion_date' instead of 'updated_at'
+        current_month_completed = completed_jobs_qs.filter(
+            completion_date__gte=current_month_start
+        ).count()
+        last_month_completed = completed_jobs_qs.filter(
+            completion_date__gte=last_month_start,
+            completion_date__lt=current_month_start
+        ).count()
+        completed_jobs_trend = calculate_trend(current_month_completed, last_month_completed)
+
         stats = {
-            'total_jobs_posted': Job.objects.filter(employer=user).count(),
-            'active_jobs': Job.objects.filter(employer=user, status='open').count(),
-            'in_progress_jobs': Job.objects.filter(employer=user, status='in_progress').count(),
-            'completed_jobs': Job.objects.filter(employer=user, status='completed').count(),
-            'total_spent': 0,  # Calculate from completed jobs
-            'average_job_cost': 0,  # Calculate from completed jobs
+            'total_jobs_posted': employer_jobs.count(),
+            'active_jobs': employer_jobs.filter(status='open').count(),
+            'in_progress_jobs': employer_jobs.filter(status='in_progress').count(),
+            'completed_jobs': completed_jobs_qs.count(),
+            'total_spent': spending_agg['total_spent'] or 0,
+            'average_job_cost': round(spending_agg['average_cost'], 2) if spending_agg['average_cost'] else 0,
+            'total_jobs_trend': total_jobs_trend,
+            'completed_jobs_trend': completed_jobs_trend,
         }
-    else:
+    
+    else: # user.account_type == 'worker'
+        worker_bids = Bid.objects.filter(worker=user)
+        
+        # --- Worker Stats (Fixed) ---
+        worker_accepted_bids_qs = worker_bids.filter(status='accepted')
+
+        completed_worker_jobs_qs = Job.objects.filter(
+            status='completed',
+            bids__in=worker_accepted_bids_qs
+        ).distinct()
+        
+        earned_agg = worker_accepted_bids_qs.filter(
+            job__status='completed'
+        ).aggregate(
+            total_earned=Sum('amount')
+        )
+
         stats = {
-            'total_bids': Bid.objects.filter(worker=user).count(),
-            'pending_bids': Bid.objects.filter(worker=user, status='pending').count(),
-            'accepted_bids': Bid.objects.filter(worker=user, status='accepted').count(),
-            'completed_jobs': Job.objects.filter(
-                selected_bid__worker=user, 
-                status='completed'
-            ).count(),
-            'total_earned': 0,  # Calculate from completed jobs
-            'average_rating': user.rating,
+            'total_bids': worker_bids.count(),
+            'pending_bids': worker_bids.filter(status='pending').count(),
+            'accepted_bids': worker_accepted_bids_qs.count(),
+            'completed_jobs': completed_worker_jobs_qs.count(),
+            'total_earned': earned_agg['total_earned'] or 0,
+            'average_rating': user.rating, 
             'total_reviews': user.total_reviews,
         }
     

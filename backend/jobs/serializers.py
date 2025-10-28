@@ -36,7 +36,7 @@ class JobListSerializer(serializers.ModelSerializer):
             'location_type', 'city', 'state', 'budget_min', 'budget_max',
             'instant_hire_price', 'start_date', 'urgency', 'status',
             'bids_count', 'lowest_bid', 'posted_date', 'number_of_workers',
-            'physical_requirements'
+            'physical_requirements','bid_count'
         ]
     
     def get_lowest_bid(self, obj):

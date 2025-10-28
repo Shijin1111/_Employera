@@ -24,6 +24,7 @@ import {
   Skeleton,
   AvatarGroup,
   Tooltip,
+  Badge,
 } from '@mui/material';
 import {
   Add,
@@ -153,7 +154,9 @@ const JobTableRow = ({ job, onAction }) => {
         </Typography>
       </TableCell>
       <TableCell align="center">
-        <Chip label={job.bid_count} size="small" variant="outlined" />
+        <Badge badgeContent={job.bid_count} color="primary">
+          <People />
+        </Badge>
       </TableCell>
       <TableCell>
         <Typography variant="body2">
@@ -380,7 +383,7 @@ const EmployerDashboard = () => {
             icon={<Work />}
             color={theme.palette.primary.main}
             subtitle="All time"
-            trend={15}
+            trend={stats?.total_jobs_trend || 0}
           />
         </Grid>
         <Grid size={{xs:12,sm:6,md:3}}>
@@ -408,7 +411,7 @@ const EmployerDashboard = () => {
             icon={<CheckCircle />}
             color={theme.palette.success.main}
             subtitle="Successfully finished"
-            trend={8}
+            trend={stats?.completed_jobs_trend || 0}
           />
         </Grid>
       </Grid>
