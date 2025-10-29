@@ -28,6 +28,7 @@ urlpatterns = [
     path('saved-jobs/', SavedJobsListView.as_view(), name='saved-jobs'),
     path('jobs/<uuid:job_id>/review/', ReviewCreateView.as_view(), name='create-review'),
     path('dashboard/stats/', dashboard_stats, name='dashboard-stats'),
+    path('analytics/', get_analytics_data, name='get-analytics-data'),
     
     # Workers endpoints
     path('workers/', WorkersListView.as_view(), name='workers-list'),

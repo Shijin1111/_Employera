@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.db.models import Q, Count, Min, Avg
+from django.db.models import Q, Count, Min, Avg, DateTimeField
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from .models import (
@@ -708,3 +708,280 @@ def history_stats(request):
         }
     
     return Response(stats)
+
+from django.utils import timezone
+from django.db.models import (
+    Avg, Count, Sum, Q, F, Case, When, Value,
+    DecimalField, CharField, DurationField, ExpressionWrapper
+)
+from django.db.models.functions import Trunc
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.exceptions import PermissionDenied
+from datetime import timedelta
+from decimal import Decimal
+
+# Import your models
+# CHANGED: Import User from 'accounts.models' and Bid from '.models'
+from .models import Job, Review, JobCategory, Bid
+from accounts.models import User 
+
+# --- Helper Functions ---
+# (These are unchanged as they are pure logic)
+
+def get_date_range(range_param):
+    """Calculates a start and end date based on the range string."""
+    today = timezone.now().date()
+    if range_param == 'week':
+        start_date = today - timedelta(days=7)
+    elif range_param == 'quarter':
+        start_date = today - timedelta(days=90)
+    elif range_param == 'year':
+        start_date = today - timedelta(days=365)
+    else: # Default to 'month'
+        start_date = today - timedelta(days=30)
+    return start_date, today
+
+def get_previous_date_range(start_date, end_date):
+    """Calculates the matching previous date range for comparison."""
+    duration = end_date - start_date
+    prev_end_date = start_date - timedelta(days=1)
+    prev_start_date = prev_end_date - duration
+    return prev_start_date, prev_end_date
+
+def calculate_change_percent(current, previous):
+    """Calculates the percentage change between two values."""
+    if previous is None or previous == 0:
+        return 100.0 if current > 0 else 0.0
+    if current is None:
+        current = Decimal(0)
+    if previous is None:
+        previous = Decimal(0)
+    return float(((Decimal(current) - Decimal(previous)) / Decimal(previous)) * 100)
+
+# --- Updated Helper Function ---
+
+def _get_overview_metrics(employer, start_date, end_date):
+    """Helper to calculate overview metrics for a given date range."""
+    
+    # Filter for jobs completed in the period
+    date_filter = Q(completion_date__date__range=[start_date, end_date])
+    completed_jobs = Job.objects.filter(
+        employer=employer, 
+        status='completed', 
+        completion_date__date__range=[start_date, end_date] # <-- ADDED filter directly
+    )
+    total_jobs_count = completed_jobs.count()
+
+    # Get all accepted bids for these completed jobs
+    # CHANGED: Use status='accepted' instead of is_accepted=True
+    accepted_bids = Bid.objects.filter(job__in=completed_jobs, status='accepted')
+
+    # Calculate metrics
+    total_spent_val = accepted_bids.aggregate(total=Sum('amount'))['total'] or Decimal(0)
+    avg_job_cost_val = (total_spent_val / total_jobs_count) if total_jobs_count > 0 else Decimal(0)
+    total_workers_count = accepted_bids.values('worker').distinct().count()
+
+    # Calculate avg completion time (completion date - start date)
+    avg_duration_data = completed_jobs.annotate(
+        duration_days=ExpressionWrapper(
+            F('completion_date__date') - F('start_date'), 
+            output_field=DurationField()
+        )
+    ).aggregate(avg_dur=Avg('duration_days'))
+    avg_completion_time_val = avg_duration_data['avg_dur'].days if avg_duration_data['avg_dur'] else 0
+
+    # Calculate avg rating given by this employer to workers on these jobs
+    avg_rating_data = Review.objects.filter(
+        job__in=completed_jobs, 
+        reviewer=employer
+    ).aggregate(avg_r=Avg('overall_rating'))
+    avg_rating_val = float(avg_rating_data['avg_r'] or 0)
+
+    return {
+        'totalJobs': total_jobs_count,
+        'totalSpent': total_spent_val,
+        'avgJobCost': avg_job_cost_val,
+        'totalWorkers': total_workers_count,
+        'avgCompletionTime': avg_completion_time_val,
+        'avgRating': avg_rating_val,
+    }
+
+# --- Main Analytics View ---
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_analytics_data(request):
+    """
+    Aggregates and returns all analytics data for an employer's dashboard.
+    """
+    # CHANGED: Check against the correct account_type string
+    if not request.user.account_type == 'employer':
+        raise PermissionDenied("You must be an employer to access analytics.")
+
+    employer = request.user
+    range_param = request.GET.get('range', 'month')
+
+    # 1. Get date ranges
+    current_start, current_end = get_date_range(range_param)
+    prev_start, prev_end = get_previous_date_range(current_start, current_end)
+
+    # 2. Get Overview Data
+    # (This section is unchanged, but calls the updated helper function)
+    current_metrics = _get_overview_metrics(employer, current_start, current_end)
+    prev_metrics = _get_overview_metrics(employer, prev_start, prev_end)
+
+    overview_data = {
+        'totalJobs': current_metrics['totalJobs'],
+        'totalJobsChange': calculate_change_percent(current_metrics['totalJobs'], prev_metrics['totalJobs']),
+        'totalSpent': current_metrics['totalSpent'],
+        'totalSpentChange': calculate_change_percent(current_metrics['totalSpent'], prev_metrics['totalSpent']),
+        'avgJobCost': current_metrics['avgJobCost'],
+        'avgJobCostChange': calculate_change_percent(current_metrics['avgJobCost'], prev_metrics['avgJobCost']),
+        'totalWorkers': current_metrics['totalWorkers'],
+        'totalWorkersChange': calculate_change_percent(current_metrics['totalWorkers'], prev_metrics['totalWorkers']),
+        'avgCompletionTime': current_metrics['avgCompletionTime'],
+        'avgCompletionTimeChange': calculate_change_percent(current_metrics['avgCompletionTime'], prev_metrics['avgCompletionTime']),
+        'avgRating': current_metrics['avgRating'],
+        'avgRatingChange': calculate_change_percent(current_metrics['avgRating'], prev_metrics['avgRating']),
+    }
+
+    # 3. Get Jobs Over Time Data
+    # (Date/time logic is unchanged)
+    if range_param == 'week':
+        trunc_kind = 'day'
+        date_format = "%b %d" # e.g., "Oct 28"
+    elif range_param == 'month' or range_param == 'quarter':
+        trunc_kind = 'week'
+        date_format = "W %U" # e.g., "W 43"
+    else: # year
+        trunc_kind = 'month'
+        date_format = "%b" # e.g., "Oct"
+
+    trunc = Trunc('job__completion_date', trunc_kind, output_field=DateTimeField())
+    
+    # CHANGED: Use status='accepted'
+    jobs_over_time_query = Bid.objects.filter(
+        job__employer=employer,
+        job__status='completed',
+        status='accepted', # Was is_accepted=True
+        job__completion_date__date__range=[current_start, current_end]
+    ).annotate(period=trunc).values('period').annotate(
+        cost=Sum('amount'),
+        jobs=Count('job_id', distinct=True)
+    ).order_by('period')
+
+    jobs_over_time_data = [
+        {
+            'month': d['period'].strftime(date_format), 
+            'jobs': d['jobs'],
+            'cost': d['cost']
+        } 
+        for d in jobs_over_time_query
+    ]
+
+    # 4. Get Costs by Category Data
+    total_spending = current_metrics['totalSpent']
+    
+    # CHANGED: Use status='accepted'
+    category_data_query = Bid.objects.filter(
+        job__employer=employer,
+        job__status='completed',
+        status='accepted', # Was is_accepted=True
+        job__completion_date__date__range=[current_start, current_end]
+    ).values('job__category__name').annotate(
+        value=Sum('amount')
+    ).order_by('-value')
+
+    costs_by_category_data = [
+        {
+            'name': d['job__category__name'] or 'Uncategorized',
+            'value': d['value'],
+            'percentage': float((d['value'] / total_spending) * 100) if total_spending > 0 else 0
+        }
+        for d in category_data_query
+    ]
+
+    # 5. Get Top Workers Data
+    # CHANGED: Use 'bids' (related_name) instead of 'bids_made' and status='accepted'
+    top_workers_query = User.objects.filter(
+        bids__job__employer=employer,
+        bids__job__status='completed',
+        bids__status='accepted', # Was bids_made__is_accepted=True
+        bids__job__completion_date__date__range=[current_start, current_end]
+    ).annotate(
+        jobs=Count('bids__job', distinct=True), # Was bids_made__job
+        earnings=Sum('bids__amount'), # Was bids_made__amount
+        avg_rating=Avg('reviews_received__overall_rating', filter=Q(reviews_received__reviewer=employer))
+    ).order_by('-earnings')[:5] # Get top 5
+
+    top_workers_data = [
+        {
+            'name': w.get_full_name(), # This is correct based on your User model
+            'jobs': w.jobs,
+            'rating': w.avg_rating or 0,
+            'earnings': w.earnings
+        }
+        for w in top_workers_query
+    ]
+
+    # 6. Get Completion Rates Data
+    # (This section is unchanged, it only queries the Job model)
+    all_jobs_in_period = Job.objects.filter(
+        employer=employer,
+        posted_date__date__range=[current_start, current_end]
+    )
+    total_jobs = all_jobs_in_period.count()
+    status_counts = all_jobs_in_period.values('status').annotate(count=Count('id'))
+
+    status_map = {s['status']: s['count'] for s in status_counts}
+    
+    completed_pct = (status_map.get('completed', 0) / total_jobs) * 100 if total_jobs > 0 else 0
+    in_progress_pct = ((status_map.get('in_progress', 0) + status_map.get('open', 0)) / total_jobs) * 100 if total_jobs > 0 else 0
+    cancelled_pct = (status_map.get('cancelled', 0) / total_jobs) * 100 if total_jobs > 0 else 0
+
+    completion_rates_data = [
+        {'status': 'Completed', 'value': completed_pct, 'color': '#2e7d32'}, # success.main
+        {'status': 'In Progress / Open', 'value': in_progress_pct, 'color': '#0288d1'}, # info.main
+        {'status': 'Cancelled', 'value': cancelled_pct, 'color': '#d32f2f'}, # error.main
+    ]
+
+    # 7. Get Bid Analytics Data
+    # (This section is unchanged, it queries Job and counts related 'bids')
+    bid_bin_ranges = Case(
+        When(bid_count__lte=5, then=Value('0-5')),
+        When(bid_count__lte=10, then=Value('6-10')),
+        When(bid_count__lte=15, then=Value('11-15')),
+        When(bid_count__lte=20, then=Value('16-20')),
+        default=Value('20+'),
+        output_field=CharField()
+    )
+    
+    binned_data = Job.objects.filter(
+        employer=employer,
+        posted_date__date__range=[current_start, current_end]
+    ).annotate(
+        bid_count=Count('bids') # 'bids' is the correct related_name from Bid.job
+    ).annotate(
+        range=bid_bin_ranges
+    ).values('range').annotate(
+        count=Count('id')
+    ).order_by('range') 
+
+    bid_analytics_data = list(binned_data)
+    sorter = ['0-5', '6-10', '11-15', '16-20', '20+']
+    bid_analytics_data.sort(key=lambda x: sorter.index(x['range']) if x['range'] in sorter else 99)
+
+    # --- Final Data Assembly ---
+    data = {
+        'overview': overview_data,
+        'jobsOverTime': jobs_over_time_data,
+        'costsByCategory': costs_by_category_data,
+        'topWorkers': top_workers_data,
+        'completionRates': completion_rates_data,
+        'bidAnalytics': bid_analytics_data,
+    }
+
+    return Response(data, status=status.HTTP_200_OK)

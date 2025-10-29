@@ -57,6 +57,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 
+// StatCard component remains the same
 const StatCard = ({ title, value, change, icon, color }) => {
   const theme = useTheme();
   const isPositive = change >= 0;
@@ -103,14 +104,22 @@ const Analytics = () => {
   const { user } = useAuth();
   const [timeRange, setTimeRange] = useState('month');
   const [loading, setLoading] = useState(true);
+  
+  // CHANGED: Updated state to include 'change' percentages
   const [analyticsData, setAnalyticsData] = useState({
     overview: {
       totalJobs: 0,
+      totalJobsChange: 0,
       totalSpent: 0,
+      totalSpentChange: 0,
       avgJobCost: 0,
+      avgJobCostChange: 0,
       totalWorkers: 0,
+      totalWorkersChange: 0,
       avgCompletionTime: 0,
+      avgCompletionTimeChange: 0,
       avgRating: 0,
+      avgRatingChange: 0,
     },
     jobsOverTime: [],
     costsByCategory: [],
@@ -123,60 +132,24 @@ const Analytics = () => {
 
   useEffect(() => {
     fetchAnalytics();
-  }, [timeRange]);
+  }, [timeRange]); // This will refetch data when the timeRange changes
 
+  // CHANGED: Replaced mockData with an actual API call
   const fetchAnalytics = async () => {
     setLoading(true);
     try {
-      // Simulate analytics data - replace with actual API call
-      const mockData = {
-        overview: {
-          totalJobs: 45,
-          totalSpent: 12500,
-          avgJobCost: 278,
-          totalWorkers: 23,
-          avgCompletionTime: 2.5,
-          avgRating: 4.6,
-        },
-        jobsOverTime: [
-          { month: 'Jan', jobs: 12, cost: 2400 },
-          { month: 'Feb', jobs: 15, cost: 3100 },
-          { month: 'Mar', jobs: 18, cost: 3800 },
-          { month: 'Apr', jobs: 14, cost: 2900 },
-          { month: 'May', jobs: 20, cost: 4200 },
-          { month: 'Jun', jobs: 16, cost: 3400 },
-        ],
-        costsByCategory: [
-          { name: 'Home', value: 4500, percentage: 36 },
-          { name: 'Moving', value: 3200, percentage: 26 },
-          { name: 'Events', value: 2800, percentage: 22 },
-          { name: 'Delivery', value: 1200, percentage: 10 },
-          { name: 'Other', value: 800, percentage: 6 },
-        ],
-        topWorkers: [
-          { name: 'John Doe', jobs: 12, rating: 4.9, earnings: 2400 },
-          { name: 'Jane Smith', jobs: 10, rating: 4.8, earnings: 2100 },
-          { name: 'Mike Johnson', jobs: 8, rating: 4.7, earnings: 1800 },
-          { name: 'Sarah Williams', jobs: 7, rating: 4.9, earnings: 1600 },
-          { name: 'Tom Brown', jobs: 6, rating: 4.6, earnings: 1400 },
-        ],
-        completionRates: [
-          { status: 'Completed', value: 78, color: theme.palette.success.main },
-          { status: 'In Progress', value: 12, color: theme.palette.info.main },
-          { status: 'Cancelled', value: 10, color: theme.palette.error.main },
-        ],
-        bidAnalytics: [
-          { range: '0-5', count: 15 },
-          { range: '6-10', count: 22 },
-          { range: '11-15', count: 18 },
-          { range: '16-20', count: 12 },
-          { range: '20+', count: 8 },
-        ],
-      };
+      // 1. Make the API call
+      const response = await api.get('/analytics/', { // <-- CHANGED: Removed extra '/api'
+        params: { range: timeRange }, // Pass the timeRange as a query param
+      });
       
-      setAnalyticsData(mockData);
+      // 2. Set the state with the data from the API
+      //    (Assumes API response.data matches the analyticsData structure)
+      setAnalyticsData(response.data);
+
     } catch (error) {
       console.error('Error fetching analytics:', error);
+      // You could set an error state here to show a message to the user
     } finally {
       setLoading(false);
     }
@@ -220,178 +193,181 @@ const Analytics = () => {
       </Box>
 
       {/* Overview Stats */}
+      {/* CHANGED: Corrected Grid syntax (from 'size' prop to 'item' + 'xs/sm/md') */}
+      {/* CHANGED: Updated 'change' prop to use dynamic data from state */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid size={{xs:12,sm:6,md:2}}>
+        <Grid item xs={12} sm={6} md={2}>
           <StatCard
             title="Total Jobs"
             value={analyticsData.overview.totalJobs}
-            change={12}
+            change={analyticsData.overview.totalJobsChange.toFixed(2)}
             icon={<Work />}
             color={theme.palette.primary}
           />
         </Grid>
-        <Grid size={{xs:12,sm:6,md:2}}>
+        <Grid item xs={12} sm={6} md={2}>
           <StatCard
             title="Total Spent"
-            value={`$${analyticsData.overview.totalSpent}`}
-            change={8}
+            value={`$${analyticsData.overview.totalSpent.toFixed(2)}`}
+            change={analyticsData.overview.totalSpentChange.toFixed(2)}
             icon={<AttachMoney />}
             color={theme.palette.success}
           />
         </Grid>
-        <Grid size={{xs:12,sm:6,md:2}}>
+        <Grid item xs={12} sm={6} md={2}>
           <StatCard
             title="Avg Cost"
-            value={`$${analyticsData.overview.avgJobCost}`}
-            change={-5}
+            value={`$${analyticsData.overview.avgJobCost.toFixed(2)}`}
+            change={analyticsData.overview.avgJobCostChange.toFixed(2)}
             icon={<Assessment />}
             color={theme.palette.warning}
           />
         </Grid>
-        <Grid size={{xs:12,sm:6,md:2}}>
+        <Grid item xs={12} sm={6} md={2}>
           <StatCard
             title="Workers Hired"
             value={analyticsData.overview.totalWorkers}
-            change={15}
+            change={analyticsData.overview.totalWorkersChange.toFixed(2)}
             icon={<People />}
             color={theme.palette.info}
           />
         </Grid>
-        <Grid size={{xs:12,sm:6,md:2}}>
+        <Grid item xs={12} sm={6} md={2}>
           <StatCard
             title="Avg Time"
-            value={`${analyticsData.overview.avgCompletionTime} days`}
-            change={-10}
+            value={`${analyticsData.overview.avgCompletionTime.toFixed(1)} days`}
+            change={analyticsData.overview.avgCompletionTimeChange.toFixed(2)}
             icon={<Schedule />}
             color={theme.palette.secondary}
           />
         </Grid>
-        <Grid size={{xs:12,sm:6,md:2}}>
+        <Grid item xs={12} sm={6} md={2}>
           <StatCard
             title="Avg Rating"
-            value={analyticsData.overview.avgRating}
-            change={3}
+            value={analyticsData.overview.avgRating.toFixed(1)}
+            change={analyticsData.overview.avgRatingChange.toFixed(2)}
             icon={<Star />}
             color={theme.palette.warning}
           />
         </Grid>
       </Grid>
 
-      {/* Charts */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        {/* Jobs Over Time */}
-        <Grid size={{xs:12,md:8}}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Jobs & Spending Trend
-            </Typography>
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={analyticsData.jobsOverTime}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis yAxisId="left" />
-                <YAxis yAxisId="right" orientation="right" />
-                <Tooltip />
-                <Legend />
-                <Area
-                  yAxisId="left"
-                  type="monotone"
-                  dataKey="jobs"
-                  stroke={theme.palette.primary.main}
-                  fill={theme.palette.primary.light}
-                  name="Jobs"
-                />
-                <Line
-                  yAxisId="right"
-                  type="monotone"
-                  dataKey="cost"
-                  stroke={theme.palette.success.main}
-                  name="Cost ($)"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </Paper>
-        </Grid>
+     {/* Charts */}
+{/* CHANGED: Reverted Grid props to 'size' to match old styling */}
+<Grid container spacing={3} sx={{ mb: 4 }}>
+  {/* Jobs Over Time */}
+  <Grid size={{xs:12,md:8}}> {/* <-- Reverted from item xs={12} md={8} */}
+    <Paper sx={{ p: 3 }}>
+      <Typography variant="h6" gutterBottom>
+        Jobs & Spending Trend
+      </Typography>
+      <ResponsiveContainer width="100%" height={300}>
+        <AreaChart data={analyticsData.jobsOverTime}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="month" />
+          <YAxis yAxisId="left" />
+          <YAxis yAxisId="right" orientation="right" />
+          <Tooltip />
+          <Legend />
+          <Area
+            yAxisId="left"
+            type="monotone"
+            dataKey="jobs"
+            stroke={theme.palette.primary.main}
+            fill={theme.palette.primary.light}
+            name="Jobs"
+          />
+          <Line
+            yAxisId="right"
+            type="monotone"
+            dataKey="cost"
+            stroke={theme.palette.success.main}
+            name="Cost ($)"
+          />
+        </AreaChart>
+      </ResponsiveContainer>
+    </Paper>
+  </Grid>
 
-        {/* Category Distribution */}
-        <Grid size={{xs:12,md:4}}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Jobs by Category
-            </Typography>
-            <ResponsiveContainer width="100%" height={300}>
-              <RechartsPieChart>
-                <Pie
-                  data={analyticsData.costsByCategory}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={(entry) => `${entry.name}: ${entry.percentage}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {analyticsData.costsByCategory.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </RechartsPieChart>
-            </ResponsiveContainer>
-          </Paper>
-        </Grid>
+  {/* Category Distribution */}
+  <Grid size={{xs:12,md:4}}> {/* <-- Reverted from item xs={12} md={4} */}
+    <Paper sx={{ p: 3 }}>
+      <Typography variant="h6" gutterBottom>
+        Jobs by Category
+      </Typography>
+      <ResponsiveContainer width="100%" height={300}>
+        <RechartsPieChart>
+          <Pie
+            data={analyticsData.costsByCategory}
+            cx="50%"
+            cy="50%"
+            labelLine={false}
+            label={(entry) => `${entry.name}: ${entry.percentage.toFixed(2)}%`}
+            outerRadius={80}
+            fill="#8884d8"
+            dataKey="value"
+          >
+            {analyticsData.costsByCategory.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            ))}
+          </Pie>
+          <Tooltip />
+        </RechartsPieChart>
+      </ResponsiveContainer>
+    </Paper>
+  </Grid>
 
-        {/* Bids per Job */}
-        <Grid size={{xs:12,md:6}}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Bids per Job Distribution
-            </Typography>
-            <ResponsiveContainer width="100%" height={250}>
-              <RechartsBarChart data={analyticsData.bidAnalytics}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="range" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="count" fill={theme.palette.primary.main} />
-              </RechartsBarChart>
-            </ResponsiveContainer>
-          </Paper>
-        </Grid>
+  {/* Bids per Job */}
+  <Grid size={{xs:12,md:6}}> {/* <-- Reverted from item xs={12} md={6} */}
+    <Paper sx={{ p: 3 }}>
+      <Typography variant="h6" gutterBottom>
+        Bids per Job Distribution
+      </Typography>
+      <ResponsiveContainer width="100%" height={250}>
+        <RechartsBarChart data={analyticsData.bidAnalytics}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="range" />
+          <YAxis />
+          <Tooltip />
+          <Bar dataKey="count" fill={theme.palette.primary.main} />
+        </RechartsBarChart>
+      </ResponsiveContainer>
+    </Paper>
+  </Grid>
 
-        {/* Completion Rates */}
-        <Grid size={{xs:12,md:6}}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Job Completion Rates
-            </Typography>
-            <Box sx={{ mt: 3 }}>
-              {analyticsData.completionRates.map((item) => (
-                <Box key={item.status} sx={{ mb: 2 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body2">{item.status}</Typography>
-                    <Typography variant="body2" fontWeight="medium">
-                      {item.value}%
-                    </Typography>
-                  </Box>
-                  <LinearProgress
-                    variant="determinate"
-                    value={item.value}
-                    sx={{
-                      height: 8,
-                      borderRadius: 4,
-                      bgcolor: 'grey.200',
-                      '& .MuiLinearProgress-bar': {
-                        bgcolor: item.color,
-                      },
-                    }}
-                  />
-                </Box>
-              ))}
+  {/* Completion Rates */}
+  <Grid size={{xs:12,md:6}}>
+    <Paper sx={{ p: 3 }}>
+      <Typography variant="h6" gutterBottom>
+        Job Completion Rates
+      </Typography>
+      <Box sx={{ mt: 3 }}>
+        {analyticsData.completionRates.map((item) => (
+          <Box key={item.status} sx={{ mb: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+              <Typography variant="body2">{item.status}</Typography>
+              <Typography variant="body2" fontWeight="medium">
+                {item.value.toFixed(2)}%  {/* <--- CHANGE IS HERE */}
+              </Typography>
             </Box>
-          </Paper>
-        </Grid>
-      </Grid>
+            <LinearProgress
+              variant="determinate"
+              value={item.value}
+              sx={{
+                height: 8,
+                borderRadius: 4,
+                bgcolor: 'grey.200',
+                '& .MuiLinearProgress-bar': {
+                  bgcolor: item.color,
+                },
+              }}
+            />
+          </Box>
+        ))}
+      </Box>
+    </Paper>
+  </Grid>
+</Grid>
 
       {/* Top Workers Table */}
       <Paper sx={{ p: 3 }}>
@@ -425,12 +401,12 @@ const Analytics = () => {
                   <TableCell align="center">
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
                       <Star sx={{ fontSize: 16, color: 'warning.main' }} />
-                      <Typography variant="body2">{worker.rating}</Typography>
+                      <Typography variant="body2">{worker.rating.toFixed(1)}</Typography>
                     </Box>
                   </TableCell>
                   <TableCell align="right">
                     <Typography variant="body2" fontWeight="medium">
-                      ${worker.earnings}
+                      ${worker.earnings.toFixed(2)}
                     </Typography>
                   </TableCell>
                 </TableRow>
